@@ -88,7 +88,7 @@ export default function Chat() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "llama3.2",
+          model: "bestie",
           prompt: message,
           stream: true,
         }),
