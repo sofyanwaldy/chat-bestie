@@ -56,6 +56,12 @@ export default function Chat() {
     scrollToBottom();
   }, [messages]);
 
+  const functionMap = {
+    search_product: (args: string) => {
+      console.log("mencari product", args);
+    },
+  } as const;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
@@ -82,14 +88,32 @@ export default function Chat() {
         },
       ]);
 
-      const response = await fetch("http://localhost:11434/api/generate", {
+      const slicedMessages = messages.slice(1);
+      const prevMessages = slicedMessages
+        .map((msg) => ({
+          role: msg.isUser ? "user" : "assistant",
+          content: msg.text,
+        }))
+        .slice(messages.length - 2);
+      const systemMessage = {
+        role: "system",
+        content: `Kamu adalah Beauty Assistant bernama 'Bestie.' Bestie berarti teman, dan sebagai Beauty Assistant khusus untuk Sociolla, tugasmu adalah membantu pengguna dalam memilih produk kecantikan yang sesuai dengan keinginan pengguna. 
+        Sociolla adalah salah satu e-commerce terkemuka yang menyediakan berbagai produk kecantikan, termasuk skincare, makeup, dan perawatan rambut. Kamu memiliki pengetahuan mendalam tentang produk-produk Sociolla dan sebagaimana cara penggunaan masing-masing produk. Kamu harus bersikap ramah, suportif, dan informatif, layaknya seorang sahabat yang selalu siap membantu pengguna dalam perjalanan kecantikannya.
+        Kamu juga dapat membantu pengguna jika mereka membutuhkan aksi seperti mencari product kamu bisa memanggil function search_product jika dibutuhkan oleh pengguna`,
+      };
+      const userMessage = {
+        role: "user",
+        content: message,
+      };
+      const messagesToSend = [systemMessage, ...prevMessages, userMessage];
+
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "bestie",
-          prompt: message,
+          messages: messagesToSend,
           stream: true,
         }),
       });
@@ -101,6 +125,7 @@ export default function Chat() {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let accumulatedText = "";
+      const func: { name: string; args: string } = { name: "", args: "" };
 
       if (reader) {
         while (true) {
@@ -117,9 +142,21 @@ export default function Chat() {
 
             try {
               const json = JSON.parse(line);
-              if (json.response) {
-                accumulatedText += json.response;
-                // Update the message with accumulated text
+
+              // Handle function calls
+              if (
+                json.message?.tool_calls &&
+                json.message.tool_calls.length > 0
+              ) {
+                const tool_calls = json.message.tool_calls[0];
+                func.name = tool_calls.function.name
+                  ? tool_calls.function.name
+                  : func.name;
+                func.args = func.args + tool_calls.function.arguments;
+              }
+              // Handle normal responses
+              else if (json.message?.content) {
+                accumulatedText += json.message.content;
                 setMessages((prev) =>
                   prev.map((msg) =>
                     msg.id === responseId
@@ -128,12 +165,21 @@ export default function Chat() {
                   )
                 );
               }
+              // Handle function call responses
+              else if (json.message?.function_call) {
+                // Don't need to do anything here as we'll handle the results when they come back
+                console.log("Function call:", json.message.function_call);
+              }
             } catch (e) {
               console.error("Error parsing JSON:", e);
             }
           }
         }
       }
+      if (func.name) {
+        functionMap[func.name as keyof typeof functionMap](func.args);
+      }
+      // console.log("accumulatedArgs:", accumulatedArgs);
     } catch (error) {
       console.error("Error:", error);
       const errorMessage: Message = {
