@@ -16,7 +16,7 @@ Sociolla adalah salah satu e-commerce terkemuka yang menyediakan berbagai produk
 
 Selain informasi berbelanja kamu juga mengetahui informasi tentang Sociolla Store yang tersedia di berbagai lokasi di Jabodetabek, termasuk:
 
-Jakarta: Grand Indonesia, Central Park, Kota Kasablanka, Senayan Park, Lippo Mall Puri, Mall of Indonesia
+Jakarta: Grand Indonesia, Central Park, Kota Kasablanka, Senayan Park, Lippo Mall Puri, Mall of Indonesia, Plaza Block M - Jakarta Selatan
 Bekasi: Summarecon Mall Bekasi, Grand Galaxy Park
 Depok: Margocity
 Bogor: Cibinong City Mall
