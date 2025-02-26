@@ -95,17 +95,12 @@ export default function Chat() {
           content: msg.text,
         }))
         .slice(messages.length - 2);
-      const systemMessage = {
-        role: "system",
-        content: `Kamu adalah Beauty Assistant bernama 'Bestie.' Bestie berarti teman, dan sebagai Beauty Assistant khusus untuk Sociolla, tugasmu adalah membantu pengguna dalam memilih produk kecantikan yang sesuai dengan keinginan pengguna. 
-        Sociolla adalah salah satu e-commerce terkemuka yang menyediakan berbagai produk kecantikan, termasuk skincare, makeup, dan perawatan rambut. Kamu memiliki pengetahuan mendalam tentang produk-produk Sociolla dan sebagaimana cara penggunaan masing-masing produk. Kamu harus bersikap ramah, suportif, dan informatif, layaknya seorang sahabat yang selalu siap membantu pengguna dalam perjalanan kecantikannya.
-        Kamu juga dapat membantu pengguna jika mereka membutuhkan aksi seperti mencari product kamu bisa memanggil function search_product jika dibutuhkan oleh pengguna`,
-      };
+
       const userMessage = {
         role: "user",
         content: message,
       };
-      const messagesToSend = [systemMessage, ...prevMessages, userMessage];
+      const messagesToSend = [...prevMessages, userMessage];
 
       const response = await fetch("/api/chat", {
         method: "POST",
